@@ -3,6 +3,8 @@
 import sys
 import random
 import json
+from randdraw import RandDraw # choosers = RandDraw([1,2,3])
+
 
 import argparse
 parser = argparse.ArgumentParser()
@@ -14,24 +16,32 @@ def register():
     name = raw_input("What is your name? ")
     if not name:
         print "Cannot proceed without a name."
-        
-    else:
+        return
+    
+    partner = raw_input("Who is your partner? Leave blank if you are single. ") or None
 
-        partner = raw_input("Who is your partner? Leave blank if you are single. ") or None
+    with open('family.json') as f:
+        data = json.load(f) # load the family.json file
 
-        with open('family.json') as f:
-            data = json.load(f) # load the family.json file
+    try:
+        if data[partner] != name:
+            print "You might want to talk to your partner."
+            return
+    
+    except KeyError:
+        pass
 
-        member_dict = {name: partner}
+    for n,p in data.iteritems():
+        if p == name and n != partner: #n if you are
+            print "Sure bout that?!"
+            return
 
-        data.update(member_dict) # append the newly registered member to it
+    data[name] = partner
 
-        with open('family.json', 'w') as f:
-            json.dump(data, f) # dump the updated family.json file
-        
-        print "Registration complete."
-        
-
+    with open('family.json', 'w') as f:
+        json.dump(data, f) # dump the updated family.json file
+    
+    print "Registration complete."
 
 def giftgiving():
     with open('family.json') as f:
@@ -39,34 +49,31 @@ def giftgiving():
     
     family = data.keys()
 
-    choosers = family[:]
-    choosees = family[:]
-
-    random.shuffle(choosers)
-    random.shuffle(choosees)
+    choosers = RandDraw(family[:]) 
+    choosees = RandDraw(family[:])
     
-    for i,j in zip(choosers,choosees):
+    while not choosers.done():
+        i = choosers.draw()
+        j = choosees.draw()
+
         if i == j: 
             print i + " picked their own name out of the hat. Let's restart!"
-            giftgiving() # restart giftgiving process if chooser chooses themself as choosee
-            break
-        
+            choosers.reset()
+            choosees.reset()
+            continue   
         elif data[i] == j:
             print i + " picked their their partner's name (" + j + ") out of the hat. Let's restart!"
-            giftgiving() # restart giftgiving process if chooser chooses themself as choosee
-            break
+            choosers.reset()
+            choosees.reset()
+            continue
 
         print i + " gives a gift to " + j
 
-
-
 def main():
-    if args.run == True:
+    if args.run:
         giftgiving()
-    
-    elif args.register == True:
-        register()
-        
+    elif args.register:
+        register() 
     else:
         print "did you want to run (--run) the program or register (--register)?"
 
