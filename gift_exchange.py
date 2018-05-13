@@ -5,25 +5,35 @@ import random
 import json
 from randdraw import RandDraw # choosers = RandDraw([1,2,3])
 
-
 import argparse
-parser = argparse.ArgumentParser()
-parser.add_argument("--run", help="Run the gift exchange.", action='store_true')
-parser.add_argument("--register", help="Register as a member of the gift exchange.", action='store_true')
-args = parser.parse_args()
 
-def register():
+NO_FILE_ERROR = 1000
+MEMBER_COUNT_ERROR = 1001
+LONE_COUPLE_ERROR = 1002
+THIRD_WHEEL_ERROR = 1003
+NO_NAME_ERROR = 1004
+
+def get_input():
     name = raw_input("What is your name? ")
     if not name:
         print "Cannot proceed without a name."
         return
     
     partner = raw_input("Who is your partner? Leave blank if you are single. ") or None
+    return (name, partner)
+
+def register(registration_info, registration_file):
+
+    if registration_info == None:
+        return NO_NAME_ERROR
+
+    name = registration_info[0]
+    partner = registration_info[1]
     
-    # Create an empty family.json if it does not exist
+    # Load the registration_file or create one if it does not exist
     try:
-        with open('family.json') as f:
-            data = json.load(f) # load the family.json file
+        with open(registration_file) as f:
+            data = json.load(f)
     except IOError:
         data = {}
 
@@ -43,32 +53,32 @@ def register():
 
     data[name] = partner
 
-    with open('family.json', 'w') as f:
-        json.dump(data, f) # dump the updated family.json file
+    with open(registration_file, 'w') as f:
+        json.dump(data, f) # dump the updated registration_file
     
     print "Registration complete."
 
-def giftgiving(familyfile):
+def giftgiving(registration_file):
     try:
-        with open(familyfile) as f:
+        with open(registration_file) as f:
             data = json.load(f)
     except IOError:
         print "Nobody has registered for the gift exchange"
-        return
+        return NO_FILE_ERROR
     
     family = data.keys()
 
-    if len(data) == 1:
-        print "A gift exchange cannot comprise of just one person."
-        return
+    if len(family) <= 1:
+        print "Not enough participants for the gift exchange."
+        return MEMBER_COUNT_ERROR
 
-    elif len(data) == 2 and family[0] == data[family[1]]:
+    elif len(family) == 2 and family[0] == data[family[1]]:
         print "A gift exchange cannot comprise of just two partners."
-        return
+        return LONE_COUPLE_ERROR
 
-    elif len(data) == 3 and (data[family[0]] is not None or data[family[1]] is not None):
+    elif len(family) == 3 and (data[family[0]] is not None or data[family[1]] is not None):
         print "A gift exchange cannot comprise of a trio of which 2 people are partners."
-        return
+        return THIRD_WHEEL_ERROR
 
     choosers = RandDraw(family[:]) 
     choosees = RandDraw(family[:])
@@ -94,10 +104,15 @@ def main():
     if args.run:
         giftgiving('family.json')
     elif args.register:
-        register() 
+        registration_info = get_input()
+        register(registration_info, 'family.json') 
     else:
         print "did you want to run (--run) the program or register (--register)?"
 
 
 if __name__ == "__main__":
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--run", help="Run the gift exchange.", action='store_true')
+    parser.add_argument("--register", help="Register as a member of the gift exchange.", action='store_true')
+    args = parser.parse_args()
     main()
