@@ -19,21 +19,26 @@ def register():
         return
     
     partner = raw_input("Who is your partner? Leave blank if you are single. ") or None
+    
+    # Create an empty family.json if it does not exist
+    try:
+        with open('family.json') as f:
+            data = json.load(f) # load the family.json file
+    except IOError:
+        data = {}
 
-    with open('family.json') as f:
-        data = json.load(f) # load the family.json file
-
+    # cannot choose a choosee who has chosen someone else
     try:
         if data[partner] != name:
-            print "You might want to talk to your partner."
+            print partner + " seems to think that " + data[partner] + " is their partner, and not you."
             return
-    
     except KeyError:
         pass
 
+    # cannot choose a choosee or say that you are single if you are chosen by someone else
     for n,p in data.iteritems():
         if p == name and n != partner: #n if you are
-            print "Sure bout that?!"
+            print "Sure bout that?! " + n + " seems to think that you are their partner."
             return
 
     data[name] = partner
@@ -43,11 +48,27 @@ def register():
     
     print "Registration complete."
 
-def giftgiving():
-    with open('family.json') as f:
-        data = json.load(f)
+def giftgiving(familyfile):
+    try:
+        with open(familyfile) as f:
+            data = json.load(f)
+    except IOError:
+        print "Nobody has registered for the gift exchange"
+        return
     
     family = data.keys()
+
+    if len(data) == 1:
+        print "A gift exchange cannot comprise of just one person."
+        return
+
+    elif len(data) == 2 and family[0] == data[family[1]]:
+        print "A gift exchange cannot comprise of just two partners."
+        return
+
+    elif len(data) == 3 and (data[family[0]] is not None or data[family[1]] is not None):
+        print "A gift exchange cannot comprise of a trio of which 2 people are partners."
+        return
 
     choosers = RandDraw(family[:]) 
     choosees = RandDraw(family[:])
@@ -62,7 +83,7 @@ def giftgiving():
             choosees.reset()
             continue   
         elif data[i] == j:
-            print i + " picked their their partner's name (" + j + ") out of the hat. Let's restart!"
+            print i + " picked their partner's name (" + j + ") out of the hat. Let's restart!"
             choosers.reset()
             choosees.reset()
             continue
@@ -71,7 +92,7 @@ def giftgiving():
 
 def main():
     if args.run:
-        giftgiving()
+        giftgiving('family.json')
     elif args.register:
         register() 
     else:
