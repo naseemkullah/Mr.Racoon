@@ -3,7 +3,7 @@
 import sys
 import random
 import json
-from randdraw import RandDraw # choosers = RandDraw([1,2,3])
+from randdraw import RandDraw 
 
 import argparse
 
@@ -12,6 +12,7 @@ MEMBER_COUNT_ERROR = 1001
 LONE_COUPLE_ERROR = 1002
 THIRD_WHEEL_ERROR = 1003
 NO_NAME_ERROR = 1004
+RELATIONSHIP_ERROR = 1005
 
 def get_input():
     name = raw_input("What is your name? ")
@@ -37,24 +38,25 @@ def register(registration_info, registration_file):
     except IOError:
         data = {}
 
-    # cannot choose a choosee who has chosen someone else
+    # Cannot input a partner who has inputted someone else as their partner
     try:
         if data[partner] != name:
             print partner + " seems to think that " + data[partner] + " is their partner, and not you."
-            return
+            return RELATIONSHIP_ERROR
     except KeyError:
         pass
 
-    # cannot choose a choosee or say that you are single if you are chosen by someone else
+    # If someone has inputted you as their partner you cannot claim to be single
+    # Also cannot input a partner different than the person who has inputted you as theirs
     for n,p in data.iteritems():
-        if p == name and n != partner: #n if you are
+        if p == name and n != partner: 
             print "Sure bout that?! " + n + " seems to think that you are their partner."
-            return
+            return RELATIONSHIP_ERROR
 
     data[name] = partner
 
     with open(registration_file, 'w') as f:
-        json.dump(data, f) # dump the updated registration_file
+        json.dump(data, f) 
     
     print "Registration complete."
 
