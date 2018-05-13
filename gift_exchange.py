@@ -78,4 +78,5 @@ def main():
         print "did you want to run (--run) the program or register (--register)?"
 
 
-main()
+if __name__ == "__main__":
+    main()
