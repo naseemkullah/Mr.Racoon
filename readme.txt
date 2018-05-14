@@ -11,8 +11,7 @@ If you are single, just leave the answer blank.
 The registration information is kept in a local file called family.json.
 In case of file corruption or for any other reason where you would like to restart the registration process, simply delete family.json.
 
-To successfully run the gift exchange, there should be at least 2 registered members who are not a couple
-or at least 4 members if there is at least one couple.
+To successfully run the gift exchange, there should be at least 2 registered members who are not a couple or at least 4 members if there is at least one couple.
 
 Once everyone has registered, the gift exchange process can start by running:
 
