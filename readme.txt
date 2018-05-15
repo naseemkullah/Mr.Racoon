@@ -3,7 +3,7 @@ Welcome to gift_exchange!
 For family members who would like to register for the gift exchange, 
 please type the following command:
 
-$ ./gift_exchange --register
+$ ./gift_exchange.py --register
 
 You will need to provide your name, followed by the name of your partner if you have one.
 If you are single, just leave the answer blank.
@@ -15,7 +15,7 @@ To successfully run the gift exchange, there should be at least 2 registered mem
 
 Once everyone has registered, the gift exchange process can start by running:
 
-$ ./gift_exchange --run
+$ ./gift_exchange.py --run
 
 If you would like to run some tests on the code please ensure that pytest is installed and run pytest from within the directory.
 This will run tests on both gift_exchange.py and it's state of the art algorithm randraw.py
